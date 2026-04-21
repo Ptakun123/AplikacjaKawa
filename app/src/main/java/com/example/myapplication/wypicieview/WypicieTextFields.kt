@@ -41,14 +41,20 @@ import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myapplication.AppDatabase
+import com.example.myapplication.Wypicie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.collections.emptyList
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NazwaKawyTextField(value: String, onValueChange: (String) -> Unit, kawaList: List<Kawa>) {
+fun NazwaKawyTextField(value: String, onValueChange: (String) -> Unit, kawaList: List<Kawa>, ready: Boolean) {
     val nazwaKawyList = remember(kawaList) {
         kawaList.map { it.Nazwa }
     }
@@ -63,7 +69,7 @@ fun NazwaKawyTextField(value: String, onValueChange: (String) -> Unit, kawaList:
 
     val currentIndicatorColor = when {
         value.isEmpty() -> defaultIndicatorColor
-        nazwaKawyList.contains(value) -> Color.Green
+        ready -> Color.Green
         else -> Color.Red
     }
 
@@ -109,10 +115,8 @@ fun NazwaKawyTextField(value: String, onValueChange: (String) -> Unit, kawaList:
 }
 
 @Composable
-fun GramyTextField(value: String, onValueChange: (String) -> Unit) {
+fun GramyTextField(value: String, onValueChange: (String) -> Unit, ready: Boolean) {
     // Walidacja: ciąg cyfr, opcjonalnie przecinek lub kropka i kolejne cyfry
-    val regex = remember { Regex("^\\d+([.,]\\d+)?\$") }
-    val isValid = regex.matches(value)
 
     // Pobranie domyślnych kolorów motywu dla stanu pustego, aby uniknąć problemów z fokusem
     val defaultFocused = MaterialTheme.colorScheme.primary
@@ -120,7 +124,7 @@ fun GramyTextField(value: String, onValueChange: (String) -> Unit) {
 
     val (focusedLine, unfocusedLine) = when {
         value.isEmpty() -> defaultFocused to defaultUnfocused
-        isValid -> Color.Green to Color.Green
+        ready -> Color.Green to Color.Green
         else -> Color.Red to Color.Red
     }
 
@@ -137,17 +141,15 @@ fun GramyTextField(value: String, onValueChange: (String) -> Unit) {
     )
 }
 @Composable
-fun DataTextField(value: String, onValueChange: (String) -> Unit) {
+fun DataTextField(value: String, onValueChange: (String) -> Unit, ready: Boolean) {
     // Walidacja: ścisły format DD.MM.YYYY
-    val regex = remember { Regex("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[0-2])\\.\\d{4}\$") }
-    val isValid = regex.matches(value)
 
     val defaultFocused = MaterialTheme.colorScheme.primary
     val defaultUnfocused = MaterialTheme.colorScheme.onSurfaceVariant
 
     val (focusedLine, unfocusedLine) = when {
         value.isEmpty() -> defaultFocused to defaultUnfocused
-        isValid -> Color.Green to Color.Green
+        ready -> Color.Green to Color.Green
         else -> Color.Red to Color.Red
     }
 
@@ -164,14 +166,12 @@ fun DataTextField(value: String, onValueChange: (String) -> Unit) {
     )
 }
 @Composable
-fun MlynekTextField(value: String, onValueChange: (String) -> Unit) {
-    val regex = remember{Regex("^\\d+\$")}
-    val isValid = regex.matches(value)
+fun MlynekTextField(value: String, onValueChange: (String) -> Unit, ready: Boolean) {
     val defaultFocused = MaterialTheme.colorScheme.primary
     val defaultUnfocused = MaterialTheme.colorScheme.onSurfaceVariant
     val (focusedLine, unfocusedLine) = when {
         value.isEmpty() -> defaultFocused to defaultUnfocused
-        isValid -> Color.Green to Color.Green
+        ready -> Color.Green to Color.Green
         else -> Color.Red to Color.Red
     }
     TextField(
@@ -248,14 +248,12 @@ fun RatingStars(
 }
 
 @Composable
-fun TempTextField(value: String, onValueChange: (String) -> Unit) {
-    val regex = remember{Regex("^\\d+\$")}
-    val isValid = regex.matches(value)
+fun TempTextField(value: String, onValueChange: (String) -> Unit, ready: Boolean) {
     val defaultFocused = MaterialTheme.colorScheme.primary
     val defaultUnfocused = MaterialTheme.colorScheme.onSurfaceVariant
     val (focusedLine, unfocusedLine) = when {
         value.isEmpty() -> defaultFocused to defaultUnfocused
-        isValid -> Color.Green to Color.Green
+        ready -> Color.Green to Color.Green
         else -> Color.Red to Color.Red
     }
     TextField(
@@ -271,10 +269,8 @@ fun TempTextField(value: String, onValueChange: (String) -> Unit) {
     )
 }
 @Composable
-fun CisnTextField(value: String, onValueChange: (String) -> Unit) {
+fun CisnTextField(value: String, onValueChange: (String) -> Unit, ready: Boolean) {
     // Walidacja: ciąg cyfr, opcjonalnie przecinek lub kropka i kolejne cyfry
-    val regex = remember { Regex("^\\d+([.,]\\d+)?\$") }
-    val isValid = regex.matches(value)
 
     // Pobranie domyślnych kolorów motywu dla stanu pustego, aby uniknąć problemów z fokusem
     val defaultFocused = MaterialTheme.colorScheme.primary
@@ -282,7 +278,7 @@ fun CisnTextField(value: String, onValueChange: (String) -> Unit) {
 
     val (focusedLine, unfocusedLine) = when {
         value.isEmpty() -> defaultFocused to defaultUnfocused
-        isValid -> Color.Green to Color.Green
+        ready -> Color.Green to Color.Green
         else -> Color.Red to Color.Red
     }
 
@@ -299,14 +295,12 @@ fun CisnTextField(value: String, onValueChange: (String) -> Unit) {
     )
 }
 @Composable
-fun CzasTextField(value: String, onValueChange: (String) -> Unit) {
-    val regex = remember{Regex("^\\d+\$")}
-    val isValid = regex.matches(value)
+fun CzasTextField(value: String, onValueChange: (String) -> Unit, ready: Boolean) {
     val defaultFocused = MaterialTheme.colorScheme.primary
     val defaultUnfocused = MaterialTheme.colorScheme.onSurfaceVariant
     val (focusedLine, unfocusedLine) = when {
         value.isEmpty() -> defaultFocused to defaultUnfocused
-        isValid -> Color.Green to Color.Green
+        ready -> Color.Green to Color.Green
         else -> Color.Red to Color.Red
     }
     TextField(
@@ -323,42 +317,27 @@ fun CzasTextField(value: String, onValueChange: (String) -> Unit) {
 }
 @Composable
 fun DodajWypicieButton(
-    nazwa: String,
-    dataValue: String,
-    gramy: String,
-    mlynek: String,
-    temp: String,
-    cisn: String,
-    czas: String,
-    ocena: Int,
-    db: AppDatabase,
-    snackBarHostState: SnackbarHostState
+    ready: Boolean,
+    onClick: () -> Unit
 ){
     val keyboardController = LocalSoftwareKeyboardController.current
-    val scope = rememberCoroutineScope()
-
     Button(
         onClick = {
             keyboardController?.hide()
-            scope.launch(Dispatchers.IO) {
-                val wypicieDao = db.wypicieDao()
-                if(wypicieDao.getKawaId(nazwa) > 0){
-                    snackBarHostState.showSnackbar(
-                        message = "Kawa o nazwie '$nazwa' nie istnieje",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                else {
-                    val wypicieObj = Wypicie(0, dataValue,gramy,mlynek, ocena, )
-                    kawaDao.insertAll(listOf(kawaObj))
-                    snackBarHostState.showSnackbar(
-                        message = "Dodano kawę $nazwa",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-            }
-        }
+            onClick()
+        },
+        enabled = ready
     ){
-        Text("Dodaj Kawę")
+        Text("Dodaj Wypicie")
     }
+}
+@Composable
+fun ListaWypicieText(wypicieList: List<Wypicie>){
+    val text: String
+    if(wypicieList.isEmpty()) text = "Brak Wypic w bazie"
+    else text =
+        wypicieList.joinToString() {
+                wypicie -> "Id_Kawy ${wypicie.idKawa}, data:${wypicie.data}, waga: ${wypicie.gramy}g, Młynek:${wypicie.rozmiarMlynka}, Temperatura: ${wypicie.temp}, Ciśnienie: ${wypicie.cisn}, Czas: ${wypicie.czas}, Ocena: ${wypicie.ocena} \n"
+        }
+    Text(text)
 }

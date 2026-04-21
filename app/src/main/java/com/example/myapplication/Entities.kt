@@ -26,9 +26,13 @@ data class Kawa(
                                         onDelete = CASCADE)])
 data class Wypicie(
     @PrimaryKey(autoGenerate = true) val id: Int =0,
-    val data: LocalDate? = null,
+    val data: String? = null,
     val gramy: Double? = null,
     val rozmiarMlynka: Int? = null,
+    val temp: Int? = null,
+    val cisn: Double? = null,
+    val czas: Int? = null,
     val ocena: Int? = null,
+
     val idKawa: Int? = null
 )

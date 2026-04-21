@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,7 +33,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import com.example.myapplication.kawaview.AddKawaView
+import com.example.myapplication.kawaview.KawaViewModel
+import com.example.myapplication.kawaview.KawaViewModelFactory
 import com.example.myapplication.wypicieview.AddWypicieView
+import com.example.myapplication.wypicieview.WypicieViewModel
+import com.example.myapplication.wypicieview.WypicieViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,31 +57,20 @@ object AddWypicie
 @Composable
 fun MyApp(db : AppDatabase) {
     val navController = rememberNavController()
+    val wypicieFactory = remember { WypicieViewModelFactory(db) }
+    val kawaFactory = remember { KawaViewModelFactory(db) }
     NavHost(navController, startDestination = AddKawa){
-        composable<AddWypicie> { backStackEntry ->
-            AddWypicieView(db, onNavigateToKawa = {
+        composable<AddWypicie> {
+            val viewModel: WypicieViewModel = viewModel(factory = wypicieFactory)
+            AddWypicieView(viewModel, onNavigateToKawa = {
                 navController.navigate(route = AddKawa)
             })
         }
-        composable<AddKawa> { backStackEntry ->
-            AddKawaView(db, onNavigateToWypicie = {
+        composable<AddKawa> {
+            val viewModel: KawaViewModel = viewModel(factory = kawaFactory)
+            AddKawaView(viewModel, onNavigateToWypicie = {
                 navController.navigate(route = AddWypicie)
             })
         }
-    }
-}
-
-
-@Composable
-fun ColorChangingButton(){
-    var clr by remember {mutableStateOf(Color.Red)};
-    Button(
-        onClick = {
-        if(clr == Color.Red) clr = Color.Yellow
-            else clr =Color.Red
-        },
-        colors= ButtonDefaults.buttonColors(containerColor = clr)
-        ){
-        Text("Zmień mój kolor!", color = Color.Black)
     }
 }

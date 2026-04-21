@@ -10,6 +10,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,23 +21,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.AppDatabase
 import com.example.myapplication.Kawa
+import com.example.myapplication.wypicieview.UiEventWypicie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun AddKawaView(
-    db: AppDatabase,
+    viewModel: KawaViewModel,
     onNavigateToWypicie: () -> Unit) {
-    // Odpowiednik zmiennej w klasie, ale "pamiętający" stan podczas odświeżania UI
-    var kraj by remember { mutableStateOf("") }
-    var nazwa by remember { mutableStateOf("") }
-    var palenie by remember { mutableStateOf("") }
-    var gatunek by remember { mutableStateOf("") }
-    var opis by remember { mutableStateOf("") }
-    var lista by remember { mutableStateOf("") }
+
+    val kawaList by viewModel.kawaList.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) { // 'Unit' sprawia, że nasłuch odpala się tylko raz przy starcie widoku
+        viewModel.uiEvents.collect { event ->
+            when (event) {
+                is UiEventKawa.ShowSnackbar -> {
+                    // Compose pokazuje Snackbar w bezpieczny sposób
+                    snackBarHostState.showSnackbar(message = event.message)
+                }
+                is UiEventKawa.NavigateBack -> {
+                    // Tu w przyszłości możesz wywołać nawigację po sukcesie
+                }
+            }
+        }
+    }
+
     // Główny kontener (odpowiednik pionowego LinearLayout)
     Scaffold(
         snackbarHost = {SnackbarHost(hostState = snackBarHostState)}
@@ -49,70 +61,15 @@ fun AddKawaView(
             //verticalArrangement = Arrangement.Center, // Wyśrodkuj w pionie
             horizontalAlignment = Alignment.CenterHorizontally // Wyśrodkuj w poziomie
         ) {
-            NazwaTextField(value = nazwa, onValueChange = { text -> nazwa = text })
-            KrajTextField(value = kraj, onValueChange = { text -> kraj = text })
-            PalenieTextField(value = palenie, onValueChange = { text -> palenie = text })
-            GatunekTextField(value = gatunek, onValueChange = { text -> gatunek = text })
-            OpisTextField(value = opis, onValueChange = { text -> opis = text })
-            DodajKaweButton(kraj, nazwa, palenie, gatunek, opis, db, snackBarHostState = snackBarHostState)
-            ListaKawText(db)
+            NazwaTextField(value = viewModel.nazwa, onValueChange = { text -> viewModel.nazwa = text })
+            KrajTextField(value = viewModel.kraj, onValueChange = { text -> viewModel.kraj = text })
+            PalenieTextField(value = viewModel.palenie, onValueChange = { text -> viewModel.palenie = text })
+            GatunekTextField(value = viewModel.gatunek, onValueChange = { text -> viewModel.gatunek = text })
+            OpisTextField(value = viewModel.opis, onValueChange = { text -> viewModel.opis = text })
+            DodajKaweButton(onClick = {viewModel.zapiszKawe()})
+            ListaKawText(kawaList)
             GoToWypicieButton({ onNavigateToWypicie() })
         }
     }
 }
-@Composable
-fun DodajKaweButton(
-    kraj: String,
-    nazwa: String,
-    palenie: String,
-    gatunek: String,
-    opis: String,
-    db: AppDatabase,
-    snackBarHostState: SnackbarHostState
-){
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val scope = rememberCoroutineScope()
 
-    Button(
-        onClick = {
-            keyboardController?.hide()
-            scope.launch(Dispatchers.IO) {
-                val kawaDao = db.kawaDao()
-                if(kawaDao.countNazwa(nazwa) > 0){
-                    snackBarHostState.showSnackbar(
-                        message = "Kawa o nazwie '$nazwa' już istnieje",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                else {
-                    val kawaObj = Kawa(0, kraj, nazwa, palenie, gatunek, opis)
-                    kawaDao.insertAll(listOf(kawaObj))
-                    snackBarHostState.showSnackbar(
-                        message = "Dodano kawę $nazwa",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-            }
-        }
-    ){
-        Text("Dodaj Kawę")
-    }
-}
-@Composable
-fun ListaKawText(db: AppDatabase){
-    val kawaList by db.kawaDao().getAll().collectAsStateWithLifecycle(initialValue = emptyList())
-    val text: String
-    if(kawaList.isEmpty()) text = "Brak Kaw w bazie"
-    else text =
-        kawaList.joinToString() {
-                kawa -> "Nazwa: ${kawa.Nazwa}, Kraj:${kawa.Kraj}, Palenie: ${kawa.Palenie}, Gatunek: ${kawa.Gatunek}, Opis: ${kawa.Opis} \n"
-        }
-    Text(text)
-}
-@Composable
-fun GoToWypicieButton(onNavigateToWypicie: () -> Unit){
-    Button(onClick =
-        {onNavigateToWypicie()}){
-        Text("Dodaj Wypicie")
-    }
-}

@@ -20,6 +20,9 @@ interface KawaDao {
     @Query("SELECT COUNT(*) FROM kawa WHERE Nazwa = :nazwa")
     fun countNazwa(nazwa: String): Int
 
+    @Query("SELECT COUNT(*) FROM wypicie WHERE idKawa = :id")
+    fun countWypicia(id: Int): Int
+
 }
 
 
@@ -32,7 +35,7 @@ interface WypicieDao {
     fun delete(wypicie: Wypicie)
 
     @Query("SELECT * FROM wypicie")
-    fun getAll(): List<Wypicie>
+    fun getAll(): Flow<List<Wypicie>>
 
     @Query("SELECT id FROM kawa WHERE Nazwa = :nazwa")
     fun getKawaId(nazwa: String): Int

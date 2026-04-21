@@ -155,5 +155,36 @@ fun OpisTextField(value: String, onValueChange: (String) -> Unit){
         placeholder = {Text("Dodaj opis")}
     )
 }
+@Composable
+fun DodajKaweButton(
+    onClick: () -> Unit
+){
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Button(
+        onClick = {
+            keyboardController?.hide()
+            onClick()
+        }
+    ){
+        Text("Dodaj Kawę")
+    }
+}
+@Composable
+fun ListaKawText(kawaList: List<Kawa>){
+    val text: String
+    if(kawaList.isEmpty()) text = "Brak Kaw w bazie"
+    else text =
+        kawaList.joinToString() {
+                kawa -> "Nazwa: ${kawa.Nazwa}, Kraj:${kawa.Kraj}, Palenie: ${kawa.Palenie}, Gatunek: ${kawa.Gatunek}, Opis: ${kawa.Opis} \n"
+        }
+    Text(text)
+}
+@Composable
+fun GoToWypicieButton(onNavigateToWypicie: () -> Unit){
+    Button(onClick =
+        {onNavigateToWypicie()}){
+        Text("Dodaj Wypicie")
+    }
+}
 
 
