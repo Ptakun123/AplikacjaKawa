@@ -1,0 +1,34 @@
+services:
+  web:
+    build: ./backend-flask-safe
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://sec_user:SuperSecretPassword!@db:5432/sec_db
+      # W produkcji JWT_SECRET_KEY należy wstrzykiwać z menedżera sekretów (np. HashiCorp Vault), a nie trzymać w plain text.
+      - JWT_SECRET_KEY=Tw0jB4rdz0Sk0mpl1k0w4nyS3kr3t!@#
+    depends_on:
+      - db
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=sec_user
+      - POSTGRES_PASSWORD=SuperSecretPassword!
+      - POSTGRES_DB=sec_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  backend-net:
+    driver: bridge
