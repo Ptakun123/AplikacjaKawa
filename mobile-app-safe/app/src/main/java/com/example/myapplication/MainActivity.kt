@@ -1,51 +1,36 @@
 package com.example.myapplication
 
 import android.os.Bundle
-import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.myapplication.ui.theme.MyApplicationTheme
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.example.myapplication.data.repository.AuthRepository
 import kotlinx.serialization.Serializable
-import com.example.myapplication.kawaview.AddKawaView
-import com.example.myapplication.kawaview.KawaViewModel
-import com.example.myapplication.kawaview.KawaViewModelFactory
-import com.example.myapplication.wypicieview.AddWypicieView
-import com.example.myapplication.wypicieview.WypicieViewModel
-import com.example.myapplication.wypicieview.WypicieViewModelFactory
+import com.example.myapplication.ui.kawaview.AddKawaView
+import com.example.myapplication.ui.kawaview.KawaViewModel
+import com.example.myapplication.ui.kawaview.KawaViewModelFactory
+import com.example.myapplication.data.roomdatabase.AppDatabase
+import com.example.myapplication.ui.loginview.AddLoginView
+import com.example.myapplication.ui.loginview.LoginViewModel
+import com.example.myapplication.ui.loginview.LoginViewModelFactory
+import com.example.myapplication.ui.wypicieview.AddWypicieView
+import com.example.myapplication.ui.wypicieview.WypicieViewModel
+import com.example.myapplication.ui.wypicieview.WypicieViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val db = (application as MyApplication).db
+        val appContainer = (application as MyApplication).appContainer
         setContent {
-            MyApp(db)
+            MyApp(appContainer)
         }
     }
 }
@@ -53,22 +38,27 @@ class MainActivity : ComponentActivity() {
 object AddKawa
 @Serializable
 object AddWypicie
-
+@Serializable
+object Login
 @Composable
-fun MyApp(db : AppDatabase) {
+fun MyApp(appContainer: AppContainer) {
     val navController = rememberNavController()
-    val wypicieFactory = remember { WypicieViewModelFactory(db) }
-    val kawaFactory = remember { KawaViewModelFactory(db) }
-    NavHost(navController, startDestination = AddKawa){
+    NavHost(navController, startDestination = Login){
         composable<AddWypicie> {
-            val viewModel: WypicieViewModel = viewModel(factory = wypicieFactory)
+            val viewModel: WypicieViewModel = viewModel(factory = appContainer.wypicieViewModelFactory)
             AddWypicieView(viewModel, onNavigateToKawa = {
                 navController.navigate(route = AddKawa)
             })
         }
         composable<AddKawa> {
-            val viewModel: KawaViewModel = viewModel(factory = kawaFactory)
+            val viewModel: KawaViewModel = viewModel(factory = appContainer.kawaViewModelFactory)
             AddKawaView(viewModel, onNavigateToWypicie = {
+                navController.navigate(route = AddWypicie)
+            })
+        }
+        composable<Login> {
+            val viewModel: LoginViewModel = viewModel(factory = appContainer.loginViewModelFactory)
+            AddLoginView(viewModel, onNavigateToWypicie =  {
                 navController.navigate(route = AddWypicie)
             })
         }

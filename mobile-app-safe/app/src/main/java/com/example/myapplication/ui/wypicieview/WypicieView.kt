@@ -1,4 +1,4 @@
-package com.example.myapplication.wypicieview
+package com.example.myapplication.ui.wypicieview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

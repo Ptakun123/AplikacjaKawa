@@ -1,11 +1,10 @@
-package com.example.myapplication
+package com.example.myapplication.data.roomdatabase
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.LocalDate
 
 @Entity(
     indices = [Index(value = ["Nazwa"], unique = true)]

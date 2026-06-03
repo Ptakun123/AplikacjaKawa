@@ -1,4 +1,4 @@
-package com.example.myapplication.kawaview
+package com.example.myapplication.ui.kawaview
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.AppDatabase
-import com.example.myapplication.Kawa
+import com.example.myapplication.data.roomdatabase.AppDatabase
+import com.example.myapplication.data.roomdatabase.Kawa
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -60,7 +60,7 @@ class KawaViewModelFactory(private val db: AppDatabase) : ViewModelProvider.Fact
     }
 }
 
-sealed interface UiEventKawa {
+sealed interface UiEventKawa { //Snackbar
     data class ShowSnackbar(val message: String) : UiEventKawa
     object NavigateBack : UiEventKawa // Na przyszłość, np. żeby wyjść z ekranu po zapisie
 }
