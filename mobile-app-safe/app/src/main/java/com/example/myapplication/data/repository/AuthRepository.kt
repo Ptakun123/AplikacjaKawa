@@ -22,6 +22,7 @@ class AuthRepository {
                 }
             } else {
                 when (response.code()) {
+                    400 -> AuthResult.Error("Brak loginu lub hasła")
                     401 -> AuthResult.Error("Nieprawidłowy login lub hasło")
                     else -> AuthResult.Error("Błąd serwera: ${response.code()}")
                 }
@@ -30,4 +31,28 @@ class AuthRepository {
             AuthResult.NetworkError
         }
     }
+    suspend fun register(user: String, pass: String): AuthResult {
+        return try {
+            val response = api.register(LoginRequest(user, pass))
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.access_token != null) {
+                    AuthResult.Success(body.access_token)
+                } else {
+                    AuthResult.Error("Błąd serwera: brak tokena w odpowiedzi")
+                }
+            } else {
+                when (response.code()) {
+                    400 -> AuthResult.Error("Brak loginu lub hasła")
+                    409 -> AuthResult.Error("Ta nazwa użytkownika już istnieje")
+                    else -> AuthResult.Error("Błąd serwera: ${response.code()}")
+                }
+            }
+        } catch (e: Exception) {
+            AuthResult.NetworkError
+        }
+    }
 }
+
+

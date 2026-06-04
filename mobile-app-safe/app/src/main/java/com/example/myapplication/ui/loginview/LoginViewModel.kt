@@ -34,22 +34,50 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel(){
         viewModelScope.launch {
             _loginState.value = LoginUiState.Loading
 
-            val result = repository.login(user, pass)
-
             // Mapowanie wyniku z repozytorium na stan UI
-            _loginState.value = when (result) {
-                is AuthResult.Success -> LoginUiState.Success(result.token)
-                is AuthResult.Error -> LoginUiState.Error(result.message)
-                is AuthResult.NetworkError -> LoginUiState.Error("Brak połączenia z internetem")
+            when (val result = repository.login(user, pass)) {
+                is AuthResult.Success -> {
+                    _loginState.value=LoginUiState.Success(result.token)
+                }
+                is AuthResult.Error -> {
+                    _loginState.value = LoginUiState.Idle
+                    eventChannel.send(UiEventLogin.ShowSnackbar(result.message))
+                }
+                is AuthResult.NetworkError ->{
+                    _loginState.value=LoginUiState.Idle
+                    eventChannel.send(UiEventLogin.ShowSnackbar("Network Error"))
+                }
+
             }
         }
     }
+    fun onRegisterClicked(user: String, pass: String) {
+        viewModelScope.launch {
+            _loginState.value = LoginUiState.Loading
+
+            // Mapowanie wyniku z repozytorium na stan UI
+            when (val result = repository.register(user, pass)) {
+                is AuthResult.Success -> {
+                    _loginState.value=LoginUiState.Success(result.token)
+                }
+                is AuthResult.Error -> {
+                    _loginState.value = LoginUiState.Idle
+                    eventChannel.send(UiEventLogin.ShowSnackbar(result.message))
+                }
+                is AuthResult.NetworkError ->{
+                    _loginState.value=LoginUiState.Idle
+                    eventChannel.send(UiEventLogin.ShowSnackbar("Network Error"))
+                }
+
+            }
+        }
+    }
+
 }
 sealed class LoginUiState {
     object Idle : LoginUiState()    // Nic się nie dzieje
     object Loading : LoginUiState() // Kręci się kółko
     data class Success(val token: String) : LoginUiState()
-    data class Error(val message: String) : LoginUiState()
 }
 sealed interface UiEventLogin { //Snackbar
     data class ShowSnackbar(val message: String) : UiEventLogin

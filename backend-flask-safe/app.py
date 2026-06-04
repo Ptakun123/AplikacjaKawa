@@ -35,7 +35,11 @@ def register():
     db.session.add(new_user)
     db.session.commit()
     
-    return jsonify({"message": "User created successfully"}), 201
+    # Po wywołaniu commit(), SQLAlchemy automatycznie mapuje wygenerowane 
+    # przez bazę id (klucz główny) do obiektu new_user.
+    access_token = create_access_token(identity=new_user.id)
+    
+    return jsonify(access_token=access_token), 201
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
