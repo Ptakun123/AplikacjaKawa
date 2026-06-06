@@ -34,10 +34,9 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel(){
         viewModelScope.launch {
             _loginState.value = LoginUiState.Loading
 
-            // Mapowanie wyniku z repozytorium na stan UI
             when (val result = repository.login(user, pass)) {
                 is AuthResult.Success -> {
-                    _loginState.value=LoginUiState.Success(result.token)
+                    _loginState.value=LoginUiState.Success
                 }
                 is AuthResult.Error -> {
                     _loginState.value = LoginUiState.Idle
@@ -58,7 +57,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel(){
             // Mapowanie wyniku z repozytorium na stan UI
             when (val result = repository.register(user, pass)) {
                 is AuthResult.Success -> {
-                    _loginState.value=LoginUiState.Success(result.token)
+                    _loginState.value=LoginUiState.Success
                 }
                 is AuthResult.Error -> {
                     _loginState.value = LoginUiState.Idle
@@ -77,7 +76,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel(){
 sealed class LoginUiState {
     object Idle : LoginUiState()    // Nic się nie dzieje
     object Loading : LoginUiState() // Kręci się kółko
-    data class Success(val token: String) : LoginUiState()
+    object Success : LoginUiState()
 }
 sealed interface UiEventLogin { //Snackbar
     data class ShowSnackbar(val message: String) : UiEventLogin

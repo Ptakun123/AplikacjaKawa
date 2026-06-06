@@ -22,6 +22,18 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    flavorDimensions += "security"
+    productFlavors {
+        create("secure") {
+            dimension = "security"
+            applicationIdSuffix = ".secure"
+        }
+        create("unsecure") {
+            dimension = "security"
+            applicationIdSuffix = ".unsecure"
+            versionNameSuffix = "-UNSECURE"
+        }
+    }
 
     buildTypes {
         release {
@@ -42,10 +54,12 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    implementation("com.google.crypto.tink:tink-android:1.21.0")
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.ui.unit)
     val room_version = "2.8.4"
-    val nav_version = "2.9.7"
+    val nav_version = "2.9.8"
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:${nav_version}")
 // Views/Fragments integration
@@ -55,7 +69,7 @@ dependencies {
     implementation("androidx.navigation:navigation-dynamic-features-fragment:${nav_version}")
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
-    ksp("androidx.room:room-compiler:2.5.0")
+    ksp("androidx.room:room-compiler:2.8.4")
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)

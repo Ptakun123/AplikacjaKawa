@@ -4,19 +4,23 @@ import com.example.myapplication.data.AuthResponse
 import com.example.myapplication.data.AuthService
 import com.example.myapplication.data.LoginRequest
 import com.example.myapplication.data.RetrofitClient
+import com.example.myapplication.data.TokenManager
 import retrofit2.Response
 
-class AuthRepository {
-    private val api = RetrofitClient.authService
+class AuthRepository (
+    private val authApi: AuthService,
+    private val tokenManager: TokenManager
+){
 
     suspend fun login(user: String, pass: String): AuthResult {
         return try {
-            val response = api.login(LoginRequest(user, pass))
+            val response = authApi.login(LoginRequest(user, pass))
 
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body?.access_token != null) {
-                    AuthResult.Success(body.access_token)
+                    tokenManager.saveToken(body.access_token)
+                    AuthResult.Success
                 } else {
                     AuthResult.Error("Błąd serwera: brak tokena w odpowiedzi")
                 }
@@ -33,12 +37,13 @@ class AuthRepository {
     }
     suspend fun register(user: String, pass: String): AuthResult {
         return try {
-            val response = api.register(LoginRequest(user, pass))
+            val response = authApi.register(LoginRequest(user, pass))
 
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body?.access_token != null) {
-                    AuthResult.Success(body.access_token)
+                    tokenManager.saveToken(body.access_token)
+                    AuthResult.Success
                 } else {
                     AuthResult.Error("Błąd serwera: brak tokena w odpowiedzi")
                 }

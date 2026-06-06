@@ -59,7 +59,11 @@ fun MyApp(appContainer: AppContainer) {
         composable<Login> {
             val viewModel: LoginViewModel = viewModel(factory = appContainer.loginViewModelFactory)
             AddLoginView(viewModel, onNavigateToWypicie =  {
-                navController.navigate(route = AddWypicie)
+                navController.navigate(route = AddWypicie) {
+                    popUpTo(Login) {
+                        inclusive = true
+                    }
+                }
             })
         }
     }
